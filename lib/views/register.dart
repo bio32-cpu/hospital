@@ -1,28 +1,33 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  LoginScreenState createState() => LoginScreenState();
+  RegisterScreenState createState() => RegisterScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
 
-  void _login() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  void _register() async {
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
 
-    final success = await ApiService().login(
+  try {
+    final success = await ApiService().register(
       _usernameController.text,
       _passwordController.text,
+      _emailController.text,
+      _phoneController.text,
     );
 
     setState(() {
@@ -30,21 +35,29 @@ class LoginScreenState extends State<LoginScreen> {
     });
 
     if (success) {
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+      if(mounted){
+        Navigator.pop(context); // Quay lại màn hình đăng nhậ
       }
+      
     } else {
       setState(() {
-        _errorMessage = "Sai tên đăng nhập hoặc mật khẩu";
+        _errorMessage = "Đăng ký không thành công. Tên đăng nhập có thể đã tồn tại.";
       });
     }
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+      _errorMessage = "Đã xảy ra lỗi: $e"; // Hiển thị chi tiết lỗi
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Đăng Nhập"),
+        title: const Text("Đăng Ký"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -60,6 +73,14 @@ class LoginScreenState extends State<LoginScreen> {
               decoration: const InputDecoration(labelText: 'Mật khẩu'),
               obscureText: true,
             ),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _phoneController,
+              decoration: const InputDecoration(labelText: 'Số điện thoại'),
+            ),
             const SizedBox(height: 20),
             if (_errorMessage != null)
               Text(
@@ -70,14 +91,14 @@ class LoginScreenState extends State<LoginScreen> {
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: _login,
-                    child: const Text("Đăng Nhập"),
+                    onPressed: _register,
+                    child: const Text("Đăng Ký"),
                   ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/register');
+                Navigator.pop(context);
               },
-              child: const Text("Chưa có tài khoản? Đăng ký ngay"),
+              child: const Text("Đã có tài khoản? Đăng nhập"),
             ),
           ],
         ),

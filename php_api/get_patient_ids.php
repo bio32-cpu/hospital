@@ -1,20 +1,20 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+header("Content-Type: application/json");
 
 include 'config.php';
 
-$sql = "SELECT * FROM medicalrecord";
+
+$sql = "SELECT idpatient FROM patient";
 $result = $conn->query($sql);
 
-$medicalRecords = array();
-while($row = $result->fetch_assoc()) {
-    $medicalRecords[] = $row;
+$ids = [];
+while ($row = $result->fetch_assoc()) {
+    $ids[] = $row['idpatient'];
 }
 
-echo json_encode($medicalRecords);
+echo json_encode($ids);
 $conn->close();
-

@@ -1,25 +1,35 @@
 class Medicine {
-  final int idMedicine;
-  final String name;
-  final DateTime expirationDate;
-  final int price;
-  final int quantity;
+  int idmedicine; 
+  String name;
+  String expirationdate;
+  int price;
+  int quantity;
 
   Medicine({
-    required this.idMedicine,
+    required this.idmedicine,
     required this.name,
-    required this.expirationDate,
+    required this.expirationdate,
     required this.price,
     required this.quantity,
   });
 
   factory Medicine.fromJson(Map<String, dynamic> json) {
     return Medicine(
-      idMedicine: json['idmedicine'],
-      name: json['name'],
-      expirationDate: DateTime.parse(json['expirationdate']),
-      price: json['price'],
-      quantity: json['quantity'],
+      idmedicine: json['idmedicine'] ,
+      name: json['name'] ?? '',
+      expirationdate: json['expirationdate'] ?? '',
+      price: json['price'] ?? 0,
+      quantity: json['quantity'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'idmedicine': idmedicine,
+      'name': name,
+      'expirationdate': expirationdate,
+      'price': price,
+      'quantity': quantity,
+    };
   }
 }

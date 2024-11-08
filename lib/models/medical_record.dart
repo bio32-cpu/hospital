@@ -1,12 +1,13 @@
 class MedicalRecord {
-  final int idMedicalRecord;
-  final String conclusion;
-  final String conjecture;
-  final bool examined;
-  final int idDoctor;
-  final int idNurse;
-  final int idPatient;
-  final int price;
+  int idMedicalRecord;
+  String conclusion;
+  String conjecture;
+  bool examined;
+  String idDoctor;
+  int idMedicine;
+  String idNuser;
+  int idPatient;
+  int price;
 
   MedicalRecord({
     required this.idMedicalRecord,
@@ -14,21 +15,59 @@ class MedicalRecord {
     required this.conjecture,
     required this.examined,
     required this.idDoctor,
-    required this.idNurse,
+    required this.idMedicine,
+    required this.idNuser,
     required this.idPatient,
     required this.price,
   });
 
-  factory MedicalRecord.fromJson(Map<String, dynamic> json) {
-    return MedicalRecord(
-      idMedicalRecord: json['idmedicalrecord'],
-      conclusion: json['conclusion'],
-      conjecture: json['conjecture'],
-      examined: json['examined'] == 1,
-      idDoctor: json['iddoctor'],
-      idNurse: json['idnuser'],
-      idPatient: json['idpatient'],
-      price: json['price'],
-    );
+  // Phương thức để chuyển JSON từ API thành đối tượng MedicalRecord
+  // factory MedicalRecord.fromJson(Map<String, dynamic> json) {
+  //   return MedicalRecord(
+  //     idMedicalRecord: json['idmedicalrecord'],
+  //     conclusion: json['conclusion'] ?? '',
+  //     conjecture: json['conjecture'] ?? '',
+  //     examined: json['examined'] == 1,
+  //     idDoctor: json['iddoctor'] ?? '',
+  //     idMedicine: json['idmedicine'],
+  //     idNuser: json['idnuser'] ?? '',
+  //     idPatient: json['idpatient'],
+  //     price: json['price'] ?? 0,
+  //   );
+  // }
+    factory MedicalRecord.fromJson(Map<String, dynamic> json) {
+  return MedicalRecord(
+    idMedicalRecord: json['idmedicalrecord'] is int
+        ? json['idmedicalrecord']
+        : int.tryParse(json['idmedicalrecord'].toString()) ?? 0,
+    conclusion: json['conclusion'] ?? '',
+    conjecture: json['conjecture'] ?? '',
+    examined: json['examined'] == 1,
+    idDoctor: json['iddoctor'] ?? '',
+    idMedicine: json['idmedicine'] is int
+        ? json['idmedicine']
+        : int.tryParse(json['idmedicine'].toString()) ?? 0,
+    idNuser: json['idnuser'] ?? '',
+    idPatient: json['idpatient'] is int
+        ? json['idpatient']
+        : int.tryParse(json['idpatient'].toString()) ?? 0,
+    price: json['price'] is int
+        ? json['price']
+        : int.tryParse(json['price'].toString()) ?? 0,
+  );
+}
+  // Phương thức để chuyển đối tượng MedicalRecord thành JSON để gửi lên API
+  Map<String, dynamic> toJson() {
+    return {
+      'idmedicalrecord': idMedicalRecord,
+      'conclusion': conclusion,
+      'conjecture': conjecture,
+      'examined': examined ? 1 : 0,
+      'iddoctor': idDoctor,
+      'idmedicine': idMedicine,
+      'idnuser': idNuser,
+      'idpatient': idPatient,
+      'price': price,
+    };
   }
 }

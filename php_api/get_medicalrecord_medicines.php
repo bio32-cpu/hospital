@@ -6,15 +6,15 @@ header("Content-Type: application/json");
 
 include 'config.php';
 
-$query = "SELECT * FROM onleave";
+$query = "SELECT * FROM medicalrecord_medicine";
 $result = $conn->query($query);
 
-$onLeaveRecords = [];
+$medicalRecordMedicines = [];
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $onLeaveRecords[] = $row;
+        $medicalRecordMedicines[] = $row;
     }
 }
 
-echo json_encode($onLeaveRecords);
+echo json_encode($medicalRecordMedicines);
 $conn->close();

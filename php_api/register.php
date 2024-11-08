@@ -1,12 +1,29 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+
 header("Content-Type: application/json");
 include 'config.php';
 
 $data = json_decode(file_get_contents("php://input"));
-$username = $data->username;
-$password = $data->password;
-$email = $data->email;
-$phone = $data->phone;
+
+if (!$data) {
+    echo json_encode(array("success" => false, "message" => "Không nhận được dữ liệu đầu vào"));
+    exit();
+}
+
+// Lấy giá trị từ JSON và kiểm tra nếu có dữ liệu
+$username = isset($data->username) ? $data->username : null;
+$password = isset($data->password) ? $data->password : null;
+$email = isset($data->email) ? $data->email : null;
+$phone = isset($data->phone) ? $data->phone : null;
+
+if (!$username || !$password || !$email || !$phone) {
+    echo json_encode(array("success" => false, "message" => "Thiếu dữ liệu cần thiết"));
+    exit();
+}
 
 // Kiểm tra xem tài khoản đã tồn tại chưa
 $checkQuery = "SELECT * FROM account WHERE username = '$username'";
@@ -26,4 +43,3 @@ if ($checkResult->num_rows > 0) {
 }
 
 $conn->close();
-
