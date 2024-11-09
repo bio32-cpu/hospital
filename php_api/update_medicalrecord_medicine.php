@@ -1,29 +1,26 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: PUT");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 include 'config.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$idMedicalRecord = $data['idmedicalrecord'] ?? null;
-$idMedicine = $data['idmedicine'] ?? null;
+$idMedicalRecord = $data['idmedicalmecord'] ?? null;
+$idMedicineOld = $data['idmedicine_old'] ?? null;
+$idMedicineNew = $data['idmedicine_new'] ?? null;
 
-if ($idMedicalRecord && $idMedicine) {
-    $query = "UPDATE medicalrecord_medicine SET idmedicine = ? WHERE idmedicalmecord = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $idMedicine, $idMedicalRecord);
-
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Record updated successfully']);
+if ($idMedicalRecord && $idMedicineOld && $idMedicineNew) {
+    $query = "UPDATE `medicalrecord_medicine` SET `idmedicine` = '$idMedicineNew' WHERE `idmedicalmecord` = '$idMedicalRecord' AND `idmedicine` = '$idMedicineOld'";
+    if ($conn->query($query) === TRUE) {
+        echo json_encode(["success" => true, "message" => "Cập nhật thuốc thành công"]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to update record']);
+        echo json_encode(["success" => false, "message" => "Lỗi: " . $conn->error]);
     }
-    $stmt->close();
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
+    echo json_encode(["success" => false, "message" => "Thiếu thông tin bắt buộc"]);
 }
-
 $conn->close();
+?>

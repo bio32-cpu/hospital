@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: DELETE");
+header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
@@ -12,9 +12,9 @@ $idMedicalRecord = $data['idmedicalmecord'] ?? null;
 $idMedicine = $data['idmedicine'] ?? null;
 
 if ($idMedicalRecord && $idMedicine) {
-    $query = "DELETE FROM `medicalrecord_medicine` WHERE `idmedicalmecord` = '$idMedicalRecord' AND `idmedicine` = '$idMedicine'";
+    $query = "INSERT INTO `medicalrecord_medicine` (`idmedicalmecord`, `idmedicine`) VALUES ('$idMedicalRecord', '$idMedicine')";
     if ($conn->query($query) === TRUE) {
-        echo json_encode(["success" => true, "message" => "Xóa thuốc thành công"]);
+        echo json_encode(["success" => true, "message" => "Thêm thuốc thành công"]);
     } else {
         echo json_encode(["success" => false, "message" => "Lỗi: " . $conn->error]);
     }

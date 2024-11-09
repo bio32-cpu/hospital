@@ -9,6 +9,7 @@ import '../models/leave.dart';
 import '../models/account.dart';
 import '../models/medicalrecord_medicine.dart';
 
+
 class ApiService {
   final String baseUrl = "http://192.168.1.10:80/hospital_flutter/php_api"; // Sử dụng 10.0.2.2 cho giả lập Android thay vì localhost
 
@@ -32,28 +33,33 @@ class ApiService {
   }
 
   
-  Future<bool> register(String username, String password, String email, String phone) async {
+   Future<bool> register(String username, String password, String role) async {
+    final url = Uri.parse('$baseUrl/register.php');
     final response = await http.post(
-      Uri.parse('$baseUrl/register.php'),
-      headers: {"Content-Type": "application/json"},
+      url,
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        "username": username,
-        "password": password,
-        "email": email,
-        "phone": phone,
+        'username': username,
+        'password': password,
+        'role': role,
       }),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['success'];
+      return data['success'] == true;
     } else {
-      throw Exception("Lỗi khi đăng ký");
+      print("Lỗi từ server: ${response.body}");
+      return false;
     }
   }
 
   Future<List<Patient>> getPatients() async {
+    
+
   // Gửi yêu cầu GET để lấy danh sách bệnh nhân
+ 
+
   final response = await http.get(Uri.parse('$baseUrl/get_patients.php'));
 
   if (response.statusCode == 200) {
@@ -353,10 +359,15 @@ Future<List<MedicalRecord>> getMedicalRecords() async {
     final response = await http.get(Uri.parse('$baseUrl/get_leaves.php'));
 
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Leave.fromJson(json)).toList();
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success'] == true) {
+        List<dynamic> leavesJson = jsonResponse['data'];
+        return leavesJson.map((leave) => Leave.fromJson(leave)).toList();
+      } else {
+        throw Exception(jsonResponse['message'] ?? 'Lỗi khi tải dữ liệu');
+      }
     } else {
-      throw Exception("Lỗi khi tải dữ liệu nghỉ phép");
+      throw Exception('Lỗi kết nối với máy chủ');
     }
   }
    Future<List<Account>> getAccounts() async {
@@ -407,32 +418,28 @@ Future<List<String>> getNuserIds() async {
 
 
 //medicalrecord_medicine
-Future<List<MedicalRecordMedicine>> getMedicalRecordMedicines() async {
-    final response = await http.get(Uri.parse('$baseUrl/get_medicalrecord_medicines.php'));
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+Future<List<MedicalRecordMedicine>> getMedicalRecordMedicines(int idMedicalRecord) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/get_medicalrecord_medicines.php'),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({'idmedicalmecord': idMedicalRecord}),
+  );
+
+  if (response.statusCode == 200) {
+    Map<String, dynamic> responseData = jsonDecode(response.body);
+
+    if (responseData['success'] == true) {
+      List<dynamic> data = responseData['data'];
       return data.map((item) => MedicalRecordMedicine.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load medical record medicines');
+      throw Exception('Không tìm thấy dữ liệu: ${responseData['message']}');
     }
+  } else {
+    throw Exception('Failed to load medical record medicines');
   }
+}
 
-  Future<bool> updateMedicalRecordMedicine(MedicalRecordMedicine recordMedicine) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/update_medicalrecord_medicine.php'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(recordMedicine.toJson()),
-    );
-    return response.statusCode == 200;
-  }
-
-  Future<bool> deleteMedicalRecordMedicine(int idMedicalRecord, int idMedicine) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/delete_medicalrecord_medicine.php?idmedicalrecord=$idMedicalRecord&idmedicine=$idMedicine'),
-    );
-    return response.statusCode == 200;
-  }
-
+  
 
 
 
@@ -472,25 +479,23 @@ Future<List<Map<String, dynamic>>> getOnLeaves() async {
     }
   }
 
-  Future<bool> addLeave(Leave leave) async {
+   Future<Map<String, dynamic>> addLeave(Leave leave) async {
   final response = await http.post(
     Uri.parse('$baseUrl/add_onleave.php'),
-    headers: {'Content-Type': 'application/json'},
+    headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       'idperson': leave.idPerson,
-      'startdate': leave.startDate.toIso8601String(),
-      'enddate': leave.endDate?.toIso8601String(), // Optional field
+      'startdate': leave.startDate,
+      'enddate': leave.endDate,
     }),
   );
 
   if (response.statusCode == 200) {
-    final responseBody = jsonDecode(response.body);
-    return responseBody['success'];
+    return jsonDecode(response.body);
   } else {
     throw Exception('Failed to add leave');
   }
 }
-
   Future<bool> updateOnLeave(int id, String idPerson, String startDate, {String? endDate}) async {
     final response = await http.put(
       Uri.parse('$baseUrl/update_onleave.php'),
@@ -510,7 +515,19 @@ Future<List<Map<String, dynamic>>> getOnLeaves() async {
       throw Exception('Failed to update onleave');
     }
   }
+  Future<Map<String, dynamic>> addLeaveWithResponse(MedicalRecord record) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/add_medicalrecord.php'),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode(record.toJson()),
+  );
 
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Lỗi từ server: ${response.body}');
+  }
+}
   Future<bool> deleteLeave(int id) async {
   final response = await http.delete(
     Uri.parse('$baseUrl/delete_onleave.php?id=$id'),
@@ -523,8 +540,46 @@ Future<List<Map<String, dynamic>>> getOnLeaves() async {
   } else {
     throw Exception('Failed to delete leave');
   }
+  
 }
+Future<Map<String, dynamic>> addMedicalRecordMedicine(int idMedicalRecord, int idMedicine) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/add_medicalrecord_medicine.php'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'idMedicalRecord': idMedicalRecord,
+        'idMedicine': idMedicine,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  Future<Map<String, dynamic>> updateMedicalRecordMedicine(int idMedicalRecord, int idMedicineOld, int idMedicineNew) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/update_medicalrecord_medicine.php'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'idmedicalmecord': idMedicalRecord,
+        'idmedicine_old': idMedicineOld,
+        'idmedicine_new': idMedicineNew,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  Future<Map<String, dynamic>> deleteMedicalRecordMedicine(int idMedicalRecord, int idMedicine) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/delete_medicalrecord_medicine.php'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'idMedicalRecord': idMedicalRecord,
+        'idMedicine': idMedicine,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
 }
+
 
   
 

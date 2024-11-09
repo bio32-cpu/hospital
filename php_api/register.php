@@ -3,10 +3,10 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-
 header("Content-Type: application/json");
 include 'config.php';
 
+// Lấy dữ liệu JSON từ yêu cầu
 $data = json_decode(file_get_contents("php://input"));
 
 if (!$data) {
@@ -15,12 +15,11 @@ if (!$data) {
 }
 
 // Lấy giá trị từ JSON và kiểm tra nếu có dữ liệu
-$username = isset($data->username) ? $data->username : null;
-$password = isset($data->password) ? $data->password : null;
-$email = isset($data->email) ? $data->email : null;
-$phone = isset($data->phone) ? $data->phone : null;
+$username = isset($data->username) ? $conn->real_escape_string($data->username) : null;
+$password = isset($data->password) ? $conn->real_escape_string($data->password) : null;
+$role = isset($data->role) ? $conn->real_escape_string($data->role) : 'PATIENT'; // Mặc định là 'PATIENT'
 
-if (!$username || !$password || !$email || !$phone) {
+if (!$username || !$password) {
     echo json_encode(array("success" => false, "message" => "Thiếu dữ liệu cần thiết"));
     exit();
 }
@@ -32,8 +31,8 @@ $checkResult = $conn->query($checkQuery);
 if ($checkResult->num_rows > 0) {
     echo json_encode(array("success" => false, "message" => "Tên đăng nhập đã tồn tại"));
 } else {
-    // Thêm tài khoản mới vào bảng `account`
-    $query = "INSERT INTO account (username, password, email, phonenumber, quit, role) VALUES ('$username', '$password', '$email', '$phone', 0, 'USER')";
+    // Không mã hóa mật khẩu trước khi lưu vào cơ sở dữ liệu
+    $query = "INSERT INTO account (username, password, quit, role) VALUES ('$username', '$password', 0, '$role')";
 
     if ($conn->query($query) === TRUE) {
         echo json_encode(array("success" => true, "message" => "Đăng ký thành công"));
@@ -43,3 +42,4 @@ if ($checkResult->num_rows > 0) {
 }
 
 $conn->close();
+?>

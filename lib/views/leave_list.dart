@@ -75,8 +75,8 @@ class LeaveListScreenState extends State<LeaveListScreen> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Ngày bắt đầu: ${leave.startDate.toLocal().toString().split(' ')[0]}"),
-                        Text("Ngày kết thúc: ${leave.endDate != null ? leave.endDate!.toLocal().toString().split(' ')[0] : 'Chưa có'}"),
+                        Text("Ngày bắt đầu: ${leave.startDate}"),
+                        Text("Ngày kết thúc: ${leave.endDate}"),
                       ],
                     ),
                     trailing: Row(

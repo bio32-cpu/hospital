@@ -14,6 +14,9 @@ import 'screen/add_patient.dart';
 import 'screen/addnurse.dart';
 import 'screen/add_medicalrecord.dart';
 import 'screen/add_medicine.dart';
+import 'screen/add_onleave.dart';
+import 'views/medicalrecord_medicine.dart';
+
 
 
 void main() {
@@ -39,6 +42,7 @@ class MyApp extends StatelessWidget {
         '/doctor_list': (context) => const DoctorListScreen(),
         '/nurse_list': (context) => const NurseListScreen(),
         '/medical_record_list': (context) => const MedicalRecordListScreen(),
+        '/medicalrecord_medicine': (context) => const MedicalRecordMedicineScreen(),
         '/medicine_list': (context) => const MedicineListScreen(),
         '/leave_list': (context) => const LeaveListScreen(),
         '/account_management': (context) => const AccountManagementScreen(),
@@ -47,6 +51,9 @@ class MyApp extends StatelessWidget {
         '/addnurse': (context) => const AddNurseScreen(),
         '/add_medicalrecord': (context) => const AddMedicalRecordScreen(),
         '/add_medicine': (context) => const AddMedicineScreen(),
+        '/add_onleave': (context) => const AddOnLeaveScreen(),
+        
+
         
         
       },

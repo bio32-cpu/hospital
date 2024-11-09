@@ -1,22 +1,22 @@
 class Leave {
   int id;
   String idPerson;
-  DateTime startDate;
-  DateTime? endDate;
+  String startDate; // Biến ngày bắt đầu dưới dạng chuỗi
+  String endDate; // Biến ngày kết thúc dưới dạng chuỗi
 
   Leave({
     required this.id,
     required this.idPerson,
     required this.startDate,
-    this.endDate,
+    required this.endDate,
   });
 
   factory Leave.fromJson(Map<String, dynamic> json) {
     return Leave(
-      id: json['id'],
-      idPerson: json['idperson'],
-      startDate: DateTime.parse(json['startdate']),
-      endDate: json['enddate'] != null ? DateTime.parse(json['enddate']) : null,
+      id: json['id'] ?? 0,
+      idPerson: json['idperson'] ?? '',
+      startDate: json['startdate'] ?? '',
+      endDate: json['enddate'] ?? '',
     );
   }
 
@@ -24,8 +24,8 @@ class Leave {
     return {
       'id': id,
       'idperson': idPerson,
-      'startdate': startDate.toIso8601String(),
-      'enddate': endDate?.toIso8601String(),
+      'startdate': startDate,
+      'enddate': endDate,
     };
   }
 }
