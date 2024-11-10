@@ -1,20 +1,30 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
-include 'config.php';
+require 'config.php'; // Đảm bảo tệp kết nối đúng
 
-$query = "SELECT * FROM medicalrecord_medicine";
-$result = $conn->query($query);
+try {
+    $sql = "SELECT * FROM medicalrecord_medicine";
+    $result = $conn->query($sql);
 
-$medicalRecordMedicines = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $medicalRecordMedicines[] = $row;
+    if (!$result) {
+        throw new Exception("Lỗi truy vấn cơ sở dữ liệu: " . $conn->error);
     }
+
+    $medicalRecords = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $medicalRecords[] = $row;
+        }
+    }
+
+    echo json_encode($medicalRecords);
+} catch (Exception $e) {
+    echo json_encode(["error" => $e->getMessage()]);
 }
 
-echo json_encode($medicalRecordMedicines);
 $conn->close();
+?>

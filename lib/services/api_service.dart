@@ -381,17 +381,28 @@ Future<List<MedicalRecord>> getMedicalRecords() async {
     }
   }
   
+Future<List<int>> getMedicalRecordIds() async {
+  final response = await http.get(Uri.parse('$baseUrl/get_medical_record_ids.php'));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = jsonDecode(response.body);
+    return data.map((item) => item as int).toList(); // Đảm bảo rằng kiểu dữ liệu là `int`
+  } else {
+    throw Exception('Failed to load medical record IDs');
+  }
+}
 
 Future<List<int>> getMedicineIds() async {
   final response = await http.get(Uri.parse('$baseUrl/get_medicine_ids.php'));
 
   if (response.statusCode == 200) {
     List<dynamic> data = jsonDecode(response.body);
-    return data.map((item) => int.tryParse(item.toString()) ?? 0).toList();
+    return data.map((item) => item as int).toList(); // Đảm bảo rằng kiểu dữ liệu là `int`
   } else {
     throw Exception('Failed to load medicine IDs');
   }
 }
+
 
 Future<List<String>> getDoctorIds() async {
   final response = await http.get(Uri.parse('$baseUrl/get_doctor_ids.php'));
@@ -417,29 +428,32 @@ Future<List<String>> getNuserIds() async {
 
 
 
-//medicalrecord_medicine
-Future<List<MedicalRecordMedicine>> getMedicalRecordMedicines(int idMedicalRecord) async {
-  final response = await http.post(
-    Uri.parse('$baseUrl/get_medicalrecord_medicines.php'),
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({'idmedicalmecord': idMedicalRecord}),
-  );
+
+
+  
+  Future<List<MedicalRecordMedicine>> getMedicalRecordMedicines() async {
+  final response = await http.get(Uri.parse('$baseUrl/get_medicalrecord_medicines.php'));
+
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
 
   if (response.statusCode == 200) {
-    Map<String, dynamic> responseData = jsonDecode(response.body);
-
-    if (responseData['success'] == true) {
-      List<dynamic> data = responseData['data'];
-      return data.map((item) => MedicalRecordMedicine.fromJson(item)).toList();
+    if (response.body.isNotEmpty) {
+      try {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) => MedicalRecordMedicine.fromJson(item as Map<String, dynamic>)).toList();
+      } catch (e) {
+        throw FormatException("Lỗi phân tích cú pháp JSON: $e");
+      }
     } else {
-      throw Exception('Không tìm thấy dữ liệu: ${responseData['message']}');
+      throw FormatException("Phản hồi trống từ máy chủ");
     }
   } else {
     throw Exception('Failed to load medical record medicines');
   }
 }
 
-  
+
 
 
 
@@ -542,16 +556,19 @@ Future<List<Map<String, dynamic>>> getOnLeaves() async {
   }
   
 }
-Future<Map<String, dynamic>> addMedicalRecordMedicine(int idMedicalRecord, int idMedicine) async {
+Future<bool> addMedicalRecordMedicine(MedicalRecordMedicine record) async {
     final response = await http.post(
       Uri.parse('$baseUrl/add_medicalrecord_medicine.php'),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        'idMedicalRecord': idMedicalRecord,
-        'idMedicine': idMedicine,
-      }),
+      body: jsonEncode(record.toJson()),
     );
-    return jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      return responseData['success'] == true;
+    } else {
+      throw Exception('Failed to add medical record medicine');
+    }
   }
 
   Future<Map<String, dynamic>> updateMedicalRecordMedicine(int idMedicalRecord, int idMedicineOld, int idMedicineNew) async {
@@ -567,17 +584,21 @@ Future<Map<String, dynamic>> addMedicalRecordMedicine(int idMedicalRecord, int i
     return jsonDecode(response.body);
   }
 
-  Future<Map<String, dynamic>> deleteMedicalRecordMedicine(int idMedicalRecord, int idMedicine) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/delete_medicalrecord_medicine.php'),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        'idMedicalRecord': idMedicalRecord,
-        'idMedicine': idMedicine,
-      }),
-    );
-    return jsonDecode(response.body);
+  Future<bool> deleteMedicalRecordMedicine(int id) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/delete_medicalrecord_medicine.php'),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({'id': id}),
+  );
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    return responseData['success'] == true; // Trả về giá trị `bool`
+  } else {
+    throw Exception('Failed to delete medical record medicine');
   }
+}
+
 }
 
 

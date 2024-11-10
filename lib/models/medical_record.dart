@@ -21,20 +21,7 @@ class MedicalRecord {
     required this.price,
   });
 
-  // Phương thức để chuyển JSON từ API thành đối tượng MedicalRecord
-  // factory MedicalRecord.fromJson(Map<String, dynamic> json) {
-  //   return MedicalRecord(
-  //     idMedicalRecord: json['idmedicalrecord'],
-  //     conclusion: json['conclusion'] ?? '',
-  //     conjecture: json['conjecture'] ?? '',
-  //     examined: json['examined'] == 1,
-  //     idDoctor: json['iddoctor'] ?? '',
-  //     idMedicine: json['idmedicine'],
-  //     idNuser: json['idnuser'] ?? '',
-  //     idPatient: json['idpatient'],
-  //     price: json['price'] ?? 0,
-  //   );
-  // }
+
     factory MedicalRecord.fromJson(Map<String, dynamic> json) {
   return MedicalRecord(
     idMedicalRecord: json['idmedicalrecord'] is int
@@ -56,7 +43,6 @@ class MedicalRecord {
         : int.tryParse(json['price'].toString()) ?? 0,
   );
 }
-  // Phương thức để chuyển đối tượng MedicalRecord thành JSON để gửi lên API
   Map<String, dynamic> toJson() {
     return {
       'idmedicalrecord': idMedicalRecord,

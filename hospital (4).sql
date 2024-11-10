@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 08, 2024 at 02:47 AM
+-- Generation Time: Nov 09, 2024 at 02:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -39,6 +39,7 @@ CREATE TABLE `account` (
 --
 
 INSERT INTO `account` (`username`, `password`, `quit`, `role`) VALUES
+('huhu1', '1111', b'0', 'PATIENT'),
 ('long12', '123', NULL, 'PATIENT');
 
 -- --------------------------------------------------------
@@ -101,7 +102,8 @@ INSERT INTO `medicalrecord` (`idmedicalrecord`, `conclusion`, `conjecture`, `exa
 --
 
 CREATE TABLE `medicalrecord_medicine` (
-  `idmedicalmecord` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
+  `idmedicalrecord` int(11) NOT NULL,
   `idmedicine` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -168,6 +170,13 @@ CREATE TABLE `onleave` (
   `startdate` datetime(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `onleave`
+--
+
+INSERT INTO `onleave` (`id`, `enddate`, `idperson`, `startdate`) VALUES
+(2, '2024-11-27 00:00:00.000000', 'doc_672b666988ada', '2024-11-09 00:00:00.000000');
+
 -- --------------------------------------------------------
 
 --
@@ -190,7 +199,6 @@ CREATE TABLE `patient` (
 INSERT INTO `patient` (`idpatient`, `address`, `age`, `name`, `phonenumber`, `sex`) VALUES
 (2, 'ha niu', 12, 'long', '0999999999', 'FEMALE'),
 (4, 'hcm', 22, 'hung', '0736475832', 'MALE'),
-(5, '', 0, '', '', 'MALE'),
 (6, 'hy', 12, 'hung', '0843524332', 'MALE');
 
 -- --------------------------------------------------------
@@ -237,8 +245,9 @@ ALTER TABLE `medicalrecord`
 -- Indexes for table `medicalrecord_medicine`
 --
 ALTER TABLE `medicalrecord_medicine`
-  ADD KEY `FKcqqc1t440xobvllpklylc5qwy` (`idmedicalmecord`),
-  ADD KEY `FK9a00cp4ohwxr8ro6c2fqokuks` (`idmedicine`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idmedicalrecord` (`idmedicalrecord`),
+  ADD KEY `idmedicine` (`idmedicine`);
 
 --
 -- Indexes for table `medicine`
@@ -276,10 +285,22 @@ ALTER TABLE `person`
 --
 
 --
+-- AUTO_INCREMENT for table `medicalrecord_medicine`
+--
+ALTER TABLE `medicalrecord_medicine`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `medicine`
 --
 ALTER TABLE `medicine`
   MODIFY `idmedicine` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `onleave`
+--
+ALTER TABLE `onleave`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `patient`
@@ -303,8 +324,8 @@ ALTER TABLE `medicalrecord`
 -- Constraints for table `medicalrecord_medicine`
 --
 ALTER TABLE `medicalrecord_medicine`
-  ADD CONSTRAINT `FK9a00cp4ohwxr8ro6c2fqokuks` FOREIGN KEY (`idmedicine`) REFERENCES `medicine` (`idmedicine`),
-  ADD CONSTRAINT `FKcqqc1t440xobvllpklylc5qwy` FOREIGN KEY (`idmedicalmecord`) REFERENCES `medicalrecord` (`idmedicalrecord`);
+  ADD CONSTRAINT `medicalrecord_medicine_ibfk_1` FOREIGN KEY (`idmedicalrecord`) REFERENCES `medicalrecord` (`idmedicalrecord`),
+  ADD CONSTRAINT `medicalrecord_medicine_ibfk_2` FOREIGN KEY (`idmedicine`) REFERENCES `medicine` (`idmedicine`);
 
 --
 -- Constraints for table `onleave`

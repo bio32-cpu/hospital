@@ -10,41 +10,31 @@ class MedicalRecordMedicineScreen extends StatefulWidget {
 }
 
 class MedicalRecordMedicineScreenState extends State<MedicalRecordMedicineScreen> {
-  late Future<List<MedicalRecordMedicine>> futureMedicines;
+  late Future<List<MedicalRecordMedicine>> futureMedicalRecordMedicines;
 
   @override
   void initState() {
     super.initState();
-    
+    futureMedicalRecordMedicines = ApiService().getMedicalRecordMedicines();
+  }
+  
+  Future<void> _refreshMedicalRecordMedicines() async {
+    setState(() {
+      futureMedicalRecordMedicines = ApiService().getMedicalRecordMedicines();
+    });
   }
 
-  
-
-  
-  Future<void> _addMedicine(int idMedicalRecord, int idMedicine) async {
-    final response = await ApiService().addMedicalRecordMedicine(idMedicalRecord, idMedicine);
-    if (response['success'] == true) {
+  Future<void> _deleteMedicalRecordMedicine(int id) async {
+    bool success = await ApiService().deleteMedicalRecordMedicine(id);
+    if (!mounted) return;
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thêm thuốc vào hồ sơ thành công')),
+        const SnackBar(content: Text('Xóa đơn thuốc thành công')),
       );
-      
+      _refreshMedicalRecordMedicines();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${response['message']}')),
-      );
-    }
-  }
-
-  Future<void> _updateMedicine(int id, int idMedicalRecord, int idMedicine) async {
-    final response = await ApiService().updateMedicalRecordMedicine(id, idMedicalRecord, idMedicine);
-    if (response['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cập nhật thuốc trong hồ sơ thành công')),
-      );
-      
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${response['message']}')),
+        const SnackBar(content: Text('Xóa đơn thuốc thất bại')),
       );
     }
   }
@@ -53,38 +43,39 @@ class MedicalRecordMedicineScreenState extends State<MedicalRecordMedicineScreen
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Quản lý đơn thuốc của bệnh nhân"),
+        title: const Text("Danh sách đơn thuốc"),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              // Mở dialog hoặc màn hình để thêm thuốc mới vào hồ sơ
+              Navigator.pushNamed(context, '/add_medicalrecord_medicine')
+                  .then((_) => _refreshMedicalRecordMedicines());
             },
           ),
         ],
       ),
       body: FutureBuilder<List<MedicalRecordMedicine>>(
-        future: futureMedicines,
+        future: futureMedicalRecordMedicines,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text("Lỗi: ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Không có đơn thuốc trong hồ sơ"));
+            return const Center(child: Text("Không có dữ liệu"));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                final medicineRecord = snapshot.data![index];
+                final record = snapshot.data![index];
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   child: ListTile(
-                    title: Text("ID MedicalRecord: ${medicineRecord.idMedicalRecord}"),
+                    title: Text("ID Bệnh án: ${record.idMedicalRecord}"),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("ID Medicine: ${medicineRecord.idMedicine}"),
+                        Text("ID Thuốc: ${record.idMedicine}"),
                       ],
                     ),
                     trailing: Row(
@@ -93,10 +84,13 @@ class MedicalRecordMedicineScreenState extends State<MedicalRecordMedicineScreen
                         IconButton(
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            // Implement chức năng cập nhật thuốc ở đây
+                            // Implement the edit functionality here
                           },
                         ),
-                        
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteMedicalRecordMedicine(record.id),
+                        ),
                       ],
                     ),
                   ),

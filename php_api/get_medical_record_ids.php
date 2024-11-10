@@ -12,21 +12,21 @@ error_reporting(E_ALL);
 require 'config.php'; // Ensure this file sets up the database connection
 
 try {
-    $sql = "SELECT idmedicine FROM medicine";
+    $sql = "SELECT idmedicalrecord FROM medicalrecord";
     $result = $conn->query($sql);
 
     if (!$result) {
         throw new Exception("Error executing query: " . $conn->error);
     }
 
-    $medicineIds = [];
+    $medicalRecordIds = [];
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $medicineIds[] = (int)$row['idmedicine']; // Ensure the value is an integer
+            $medicalRecordIds[] = (int)$row['idmedicalrecord']; // Ensure the value is an integer
         }
     }
 
-    echo json_encode($medicineIds);
+    echo json_encode($medicalRecordIds);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(["error" => "Lỗi khi tải dữ liệu: " . $e->getMessage()]);

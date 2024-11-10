@@ -1,7 +1,7 @@
 class MedicalRecordMedicine {
-  int id;
-  int idMedicalRecord;
-  int idMedicine;
+  final int id;
+  final int idMedicalRecord;
+  final int idMedicine;
 
   MedicalRecordMedicine({
     required this.id,
@@ -11,17 +11,17 @@ class MedicalRecordMedicine {
 
   factory MedicalRecordMedicine.fromJson(Map<String, dynamic> json) {
     return MedicalRecordMedicine(
-      id: json['id'],
-      idMedicalRecord: json['idmedicalrecord'],
-      idMedicine: json['idmedicine'],
+      id: int.parse(json['id'].toString()), 
+      idMedicalRecord: int.parse(json['idmedicalrecord'].toString()),
+      idMedicine: int.parse(json['idmedicine'].toString()), 
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'idmedicalrecord': idMedicalRecord,
-      'idmedicine': idMedicine,
+      'idMedicalRecord': idMedicalRecord,
+      'idMedicine': idMedicine,
     };
   }
 }

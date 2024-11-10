@@ -1,25 +1,38 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
-include 'config.php';
+require 'config.php';
 
-$data = json_decode(file_get_contents("php://input"), true);
+try {
+    $input = json_decode(file_get_contents("php://input"), true);
 
-$idMedicalRecord = $data['idmedicalmecord'] ?? null;
-$idMedicine = $data['idmedicine'] ?? null;
+    if (isset($input['idMedicalRecord']) && isset($input['idMedicine'])) {
+        // Kiểm tra xem các giá trị có phải là số nguyên không
+        if (is_numeric($input['idMedicalRecord']) && is_numeric($input['idMedicine'])) {
+            $idMedicalRecord = (int)$conn->real_escape_string($input['idMedicalRecord']);
+            $idMedicine = (int)$conn->real_escape_string($input['idMedicine']);
 
-if ($idMedicalRecord && $idMedicine) {
-    $query = "INSERT INTO `medicalrecord_medicine` (`idmedicalmecord`, `idmedicine`) VALUES ('$idMedicalRecord', '$idMedicine')";
-    if ($conn->query($query) === TRUE) {
-        echo json_encode(["success" => true, "message" => "Thêm thuốc thành công"]);
+            // Câu lệnh SQL để chèn dữ liệu
+            $sql = "INSERT INTO medicalrecord_medicine (idmedicalrecord, idmedicine) VALUES ('$idMedicalRecord', '$idMedicine')";
+
+            if ($conn->query($sql) === TRUE) {
+                echo json_encode(["success" => true, "message" => "Đơn thuốc đã được thêm thành công"]);
+            } else {
+                throw new Exception("Lỗi khi thêm dữ liệu: " . $conn->error);
+            }
+        } else {
+            throw new Exception("Dữ liệu đầu vào phải là số nguyên hợp lệ");
+        }
     } else {
-        echo json_encode(["success" => false, "message" => "Lỗi: " . $conn->error]);
+        throw new Exception("Dữ liệu đầu vào không hợp lệ");
     }
-} else {
-    echo json_encode(["success" => false, "message" => "Thiếu thông tin bắt buộc"]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
+
 $conn->close();
 ?>
